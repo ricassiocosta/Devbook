@@ -67,3 +67,31 @@ func (u Users) Search(nameOrUsername string) ([]models.User, error) {
 
 	return users, nil
 }
+
+//Show returns a user from database
+func (u Users) Show(userID uint64) (models.User, error) {
+	lines, err := u.db.Query(
+		"select id, name, username, email, created_at from users where id = $1",
+		userID,
+	)
+	if err != nil {
+		return models.User{}, err
+	}
+	defer lines.Close()
+
+	var user models.User
+
+	if lines.Next() {
+		if err = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+		); err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}
