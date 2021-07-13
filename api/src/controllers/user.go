@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // Create an user in the app
@@ -46,9 +47,25 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, user)
 }
 
-// Index return all registered users in the database
-func Index(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting all users"))
+// Search return all registered users in the database
+func Search(w http.ResponseWriter, r *http.Request) {
+	nameOrUsername := strings.ToLower(r.URL.Query().Get("user"))
+
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepositories(db)
+	users, err := repository.Search(nameOrUsername)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, users)
 }
 
 // Show return an specific user
