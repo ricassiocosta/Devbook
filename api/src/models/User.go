@@ -9,6 +9,14 @@ import (
 	"github.com/badoux/checkmail"
 )
 
+var (
+	errMissingName     = errors.New("name is a mandatory field and can't be blank")
+	errMissingUsername = errors.New("username is a mandatory field and can't be blank")
+	errMissingEmail    = errors.New("email is a mandatory field and can't be blank")
+	errMissingPassword = errors.New("password is a mandatory field and can't be blank")
+	errInvalidEmail    = errors.New("email must have a valid format")
+)
+
 // User defines the user's data stored in the database
 type User struct {
 	ID        uint64    `json:"id,omitempty"`
@@ -34,23 +42,23 @@ func (u *User) Prepare(step string) error {
 
 func (u *User) validate(step string) error {
 	if u.Name == "" {
-		return errors.New("user name is mandatory")
+		return errMissingName
 	}
 
 	if u.Username == "" {
-		return errors.New("username is mandatory")
+		return errMissingUsername
 	}
 
 	if u.Email == "" {
-		return errors.New("user email is mandatory")
+		return errMissingEmail
 	}
 
 	if err := checkmail.ValidateFormat(u.Email); err != nil {
-		return errors.New("email must have a valid format")
+		return errInvalidEmail
 	}
 
 	if step == "register" && u.Password == "" {
-		return errors.New("user password is mandatory")
+		return errMissingPassword
 	}
 
 	return nil
