@@ -95,3 +95,19 @@ func (u Users) Show(userID uint64) (models.User, error) {
 
 	return user, nil
 }
+
+func (u Users) Update(ID uint64, user models.User) error {
+	statement, err := u.db.Query(
+		"update users set name = $1, username = $2, email = $3 where id = $4",
+		user.Name,
+		user.Username,
+		user.Email,
+		ID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}

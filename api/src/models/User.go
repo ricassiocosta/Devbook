@@ -17,8 +17,8 @@ type User struct {
 }
 
 // Prepare will validate and format the received user
-func (u *User) Prepare() error {
-	if err := u.validate(); err != nil {
+func (u *User) Prepare(step string) error {
+	if err := u.validate(step); err != nil {
 		return err
 	}
 
@@ -26,7 +26,7 @@ func (u *User) Prepare() error {
 	return nil
 }
 
-func (u *User) validate() error {
+func (u *User) validate(step string) error {
 	if u.Name == "" {
 		return errors.New("user name is mandatory")
 	}
@@ -39,11 +39,15 @@ func (u *User) validate() error {
 		return errors.New("user email is mandatory")
 	}
 
+	if step == "register" && u.Password == "" {
+		return errors.New("user password is mandatory")
+	}
+
 	return nil
 }
 
 func (u *User) format() {
 	u.Name = strings.TrimSpace(u.Name)
-	u.Name = strings.TrimSpace(u.Username)
-	u.Name = strings.TrimSpace(u.Email)
+	u.Username = strings.TrimSpace(u.Username)
+	u.Email = strings.TrimSpace(u.Email)
 }
