@@ -5,6 +5,7 @@ import (
 	"api/src/models"
 	"api/src/repositories"
 	"api/src/responses"
+	"api/src/utils/authentication"
 	"api/src/utils/security"
 	"encoding/json"
 	"errors"
@@ -49,5 +50,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("logged in!"))
+	token, _ := authentication.GenerateToken(storedUser.ID)
+	w.Write([]byte(token))
 }
