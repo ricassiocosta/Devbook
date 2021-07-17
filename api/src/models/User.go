@@ -1,7 +1,7 @@
 package models
 
 import (
-	"api/src/utils"
+	"api/src/utils/security"
 	"errors"
 	"strings"
 	"time"
@@ -62,7 +62,7 @@ func (u *User) format(step string) error {
 	u.Email = strings.TrimSpace(u.Email)
 
 	if step == "register" {
-		hashedPassword, err := utils.Hash(u.Password)
+		hashedPassword, err := security.Hash(u.Password)
 		if err != nil {
 			return err
 		}
