@@ -20,7 +20,7 @@ func NewUsersRepositories(db *sql.DB) *Users {
 func (u Users) Create(user models.User) (uint64, error) {
 	lasInsertID := 0
 	err := u.db.QueryRow(
-		`insert into users (name, username, email, password) values ($1, $2, $3, $4) returning id`,
+		`INSERT INTO users (name, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id`,
 		user.Name,
 		user.Username,
 		user.Email,
@@ -39,7 +39,7 @@ func (u Users) Search(nameOrUsername string) ([]models.User, error) {
 	nameOrUsername = fmt.Sprintf("%%%s%%", nameOrUsername)
 
 	lines, err := u.db.Query(
-		"select id, name, username, email, created_at from users where name LIKE $1 or username LIKE $2",
+		"SELECT id, name, username, email, created_at FROM users WHERE name LIKE $1 OR username LIKE $2",
 		nameOrUsername,
 		nameOrUsername,
 	)
@@ -71,7 +71,7 @@ func (u Users) Search(nameOrUsername string) ([]models.User, error) {
 //Show returns a user from database
 func (u Users) Show(userID uint64) (models.User, error) {
 	lines, err := u.db.Query(
-		"select id, name, username, email, created_at from users where id = $1",
+		"SELECT id, name, username, email, created_at FROM users WHERE id = $1",
 		userID,
 	)
 	if err != nil {
@@ -98,10 +98,23 @@ func (u Users) Show(userID uint64) (models.User, error) {
 
 func (u Users) Update(ID uint64, user models.User) error {
 	statement, err := u.db.Query(
-		"update users set name = $1, username = $2, email = $3 where id = $4",
+		"UPDATE users SET name = $1, username = $2, email = $3 WHERE id = $4",
 		user.Name,
 		user.Username,
 		user.Email,
+		ID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
+
+func (u Users) Delete(ID uint64) error {
+	statement, err := u.db.Query(
+		"DELETE FROM users WHERE id = $1",
 		ID,
 	)
 	if err != nil {
