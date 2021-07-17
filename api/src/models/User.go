@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/src/utils"
 	"errors"
 	"strings"
 	"time"
@@ -24,7 +25,10 @@ func (u *User) Prepare(step string) error {
 		return err
 	}
 
-	u.format()
+	if err := u.format(step); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -52,8 +56,19 @@ func (u *User) validate(step string) error {
 	return nil
 }
 
-func (u *User) format() {
+func (u *User) format(step string) error {
 	u.Name = strings.TrimSpace(u.Name)
 	u.Username = strings.TrimSpace(u.Username)
 	u.Email = strings.TrimSpace(u.Email)
+
+	if step == "register" {
+		hashedPassword, err := utils.Hash(u.Password)
+		if err != nil {
+			return err
+		}
+
+		u.Password = string(hashedPassword)
+	}
+
+	return nil
 }
