@@ -12,6 +12,7 @@ import (
 var (
 	DBConnectionString = ""
 	APIPort            = 0
+	APISecret          []byte
 )
 
 const (
@@ -30,6 +31,8 @@ func LoadEnv() {
 	if err != nil {
 		APIPort = defaultAPIPort
 	}
+
+	APISecret = []byte(os.Getenv("API_SECRET"))
 
 	dbAddress := os.Getenv("DB_ADDRESS")
 	dbUser := os.Getenv("DB_USER")
