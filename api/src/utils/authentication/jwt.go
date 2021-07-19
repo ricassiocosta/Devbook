@@ -3,7 +3,9 @@ package authentication
 import (
 	"api/src/config"
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,4 +56,25 @@ func getVerificationKey(token *jwt.Token) (interface{}, error) {
 	}
 
 	return config.APISecret, nil
+}
+
+// GetUserID returns the user ID stored in the token
+func GetUserID(r *http.Request) (uint64, error) {
+	tokenString := getToken(r)
+	token, err := jwt.Parse(tokenString, getVerificationKey)
+	if err != nil {
+		return 0, errInvalidToken
+	}
+
+	permissions, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return 0, errInvalidToken
+	}
+
+	userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["userID"]), 10, 64)
+	if err != nil {
+		return 0, errInvalidToken
+	}
+
+	return userID, nil
 }

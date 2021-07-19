@@ -5,13 +5,19 @@ import (
 	"api/src/models"
 	"api/src/repositories"
 	"api/src/responses"
+	"api/src/utils/authentication"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+)
+
+var (
+	errForbidden = errors.New("this action can't be performed")
 )
 
 // Create an user in the app
@@ -106,6 +112,17 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	authenticatedUserID, err := authentication.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != authenticatedUserID {
+		responses.Error(w, http.StatusForbidden, errForbidden)
+		return
+	}
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -146,6 +163,17 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.ParseUint(parameters["id"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	authenticatedUserID, err := authentication.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != authenticatedUserID {
+		responses.Error(w, http.StatusForbidden, errForbidden)
 		return
 	}
 
