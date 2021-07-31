@@ -250,3 +250,40 @@ func (u Users) GetFollowing(userID uint64) ([]models.User, error) {
 
 	return users, nil
 }
+
+// GetPassword returns user's password
+func (u Users) GetPassword(userID uint64) (string, error) {
+	line, err := u.db.Query(
+		"SELECT password FROM users WHERE id = $1",
+		userID,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer line.Close()
+
+	var user models.User
+
+	if line.Next() {
+		if err = line.Scan(&user.Password); err != nil {
+			return "", err
+		}
+	}
+
+	return user.Password, nil
+}
+
+// UpdatePassword updates user's password
+func (u Users) UpdatePassword(userID uint64, password string) error {
+	statement, err := u.db.Query(
+		"UPDATE users SET password = $1 WHERE id = $2",
+		password,
+		userID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
