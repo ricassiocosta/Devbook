@@ -229,3 +229,39 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusNoContent, nil)
 }
+
+// Unfollow make an user stop follow another
+func Unfollow(w http.ResponseWriter, r *http.Request) {
+	followerID, err := authentication.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	parameters := mux.Vars(r)
+	userID, err := strconv.ParseUint(parameters["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if followerID == userID {
+		responses.Error(w, http.StatusForbidden, errForbidden)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewUsersRepositories(db)
+	if err = repository.Unfollow(userID, followerID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}
