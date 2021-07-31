@@ -145,3 +145,17 @@ func (u Users) GetByEmail(email string) (models.User, error) {
 
 	return user, nil
 }
+
+func (u Users) Follow(userID, followerID uint64) error {
+	statement, err := u.db.Query(
+		"INSERT INTO followers (user_id, follower_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+		userID,
+		followerID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
