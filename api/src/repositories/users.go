@@ -96,6 +96,7 @@ func (u Users) Show(userID uint64) (models.User, error) {
 	return user, nil
 }
 
+// Update enable users update they informations
 func (u Users) Update(ID uint64, user models.User) error {
 	statement, err := u.db.Query(
 		"UPDATE users SET name = $1, username = $2, email = $3 WHERE id = $4",
@@ -112,6 +113,7 @@ func (u Users) Update(ID uint64, user models.User) error {
 	return nil
 }
 
+// Delete enable users to delete their accounts
 func (u Users) Delete(ID uint64) error {
 	statement, err := u.db.Query(
 		"DELETE FROM users WHERE id = $1",
@@ -125,6 +127,7 @@ func (u Users) Delete(ID uint64) error {
 	return nil
 }
 
+// GetByEmail returns an user who email matches to a given one
 func (u Users) GetByEmail(email string) (models.User, error) {
 	line, err := u.db.Query(
 		"SELECT id, password FROM users WHERE email = $1",
@@ -146,6 +149,7 @@ func (u Users) GetByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
+// Follow enable users to follow anothers
 func (u Users) Follow(userID, followerID uint64) error {
 	statement, err := u.db.Query(
 		"INSERT INTO followers (user_id, follower_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
@@ -160,6 +164,7 @@ func (u Users) Follow(userID, followerID uint64) error {
 	return nil
 }
 
+// Follow enable users to stop follow anothers
 func (u Users) Unfollow(userID, followerID uint64) error {
 	statement, err := u.db.Query(
 		"DELETE FROM followers WHERE user_id = $1 AND follower_id = $2",
@@ -172,4 +177,40 @@ func (u Users) Unfollow(userID, followerID uint64) error {
 	defer statement.Close()
 
 	return nil
+}
+
+// GetFollowers returns all user followers
+func (u Users) GetFollowers(userID uint64) ([]models.User, error) {
+	lines, err := u.db.Query(
+		`SELECT u.id, u.name, u.username, u.email, u.created_at
+			FROM users AS u INNER JOIN followers AS f
+			ON u.id = f.follower_id
+			WHERE f.user_id = $1
+		`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+
+	var users []models.User
+
+	for lines.Next() {
+		var user models.User
+
+		if err := lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
