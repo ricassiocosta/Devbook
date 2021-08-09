@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	errForbidden = errors.New("this action can't be performed")
+	errForbidden     = errors.New("this action can't be performed")
 	errWrongPassword = errors.New("current password is wrong")
 )
 
@@ -48,7 +48,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	user.ID, err = repository.Create(user)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -69,7 +69,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	users, err := repository.Search(nameOrUsername)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -95,7 +95,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	user, err := repository.Show(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -149,7 +149,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	err = repository.Update(userID, user)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -186,7 +186,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	err = repository.Delete(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -223,7 +223,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	if err = repository.Follow(userID, followerID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -259,7 +259,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	if err = repository.Unfollow(userID, followerID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -284,7 +284,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	followers, err := repository.GetFollowers(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -310,7 +310,7 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	followers, err := repository.GetFollowing(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -343,7 +343,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	repository := repositories.NewUsersRepositories(db)
+	repository := repositories.NewUsersRepository(db)
 	storedPassword, err := repository.GetPassword(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)

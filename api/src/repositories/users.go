@@ -11,27 +11,27 @@ type Users struct {
 	db *sql.DB
 }
 
-// NewUsersRepositories
-func NewUsersRepositories(db *sql.DB) *Users {
+// NewUsersRepository
+func NewUsersRepository(db *sql.DB) *Users {
 	return &Users{db}
 }
 
 // Create insert an user in the database
 func (u Users) Create(user models.User) (uint64, error) {
-	lasInsertID := 0
+	lastInsertID := 0
 	err := u.db.QueryRow(
 		`INSERT INTO users (name, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id`,
 		user.Name,
 		user.Username,
 		user.Email,
 		user.Password,
-	).Scan(&lasInsertID)
+	).Scan(&lastInsertID)
 	if err != nil {
 		return 0, err
 	}
 	defer u.db.Close()
 
-	return uint64(lasInsertID), nil
+	return uint64(lastInsertID), nil
 }
 
 // Search gets all users that matches with an given filter
