@@ -32,7 +32,7 @@ func (p Posts) Create(post models.Post) (uint64, error) {
 	return uint64(lastInsertID), nil
 }
 
-// Create get a single post from database
+// GetByID get a single post from database
 func (p Posts) GetByID(postID uint64) (models.Post, error) {
 	line, err := p.db.Query(
 		`
@@ -64,4 +64,46 @@ func (p Posts) GetByID(postID uint64) (models.Post, error) {
 	}
 
 	return post, nil
+}
+
+// GetPosts gets the followers posts
+func (p Posts) GetPosts(userID uint64) ([]models.Post, error) {
+	lines, err := p.db.Query(
+		`
+		SELECT DISTINCT p.*, u.username 
+		FROM posts AS p INNER JOIN users AS u
+		ON u.id = p.author_id 
+		INNER JOIN followers AS f ON p.author_id = f.user_id
+		WHERE u.id = $1 OR f.follower_id = $2
+		ORDER BY 1 DESC
+		`,
+		userID,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+
+	var posts []models.Post
+
+	for lines.Next() {
+		var post models.Post
+
+		if err = lines.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorUsername,
+		); err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	return posts, nil
 }

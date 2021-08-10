@@ -60,7 +60,27 @@ func Publish(w http.ResponseWriter, r *http.Request) {
 
 // GetPosts return the feed for a given user
 func GetPosts(w http.ResponseWriter, r *http.Request) {
+	userID, err := authentication.GetUserID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
 
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repository := repositories.NewPostsRepository(db)
+	posts, err := repository.GetPosts(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusCreated, posts)
 }
 
 // GetPost return a single post
