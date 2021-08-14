@@ -137,3 +137,39 @@ func (p Posts) Delete(postID uint64) error {
 
 	return nil
 }
+
+// GetPostsByUserID return all posts from a specific user
+func (p Posts) GetPostsByUserID(userID uint64) ([]models.Post, error) {
+	lines, err := p.db.Query(`
+		SELECT p.*, u.username FROM posts p
+		JOIN users u on u.id = p.author_id
+		WHERE p.author_id = $1
+	`, userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+
+	var posts []models.Post
+
+	for lines.Next() {
+		var post models.Post
+
+		if err = lines.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorUsername,
+		); err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
