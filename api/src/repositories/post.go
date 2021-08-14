@@ -184,3 +184,19 @@ func (p Posts) Like(postID uint64) error {
 
 	return nil
 }
+
+// Dislike add one like on post count
+func (p Posts) Dislike(postID uint64) error {
+	statement, err := p.db.Query(`
+		UPDATE posts SET likes =
+		CASE WHEN likes > 0 THEN likes - 1
+		ELSE likes END
+		WHERE id = $1
+	`, postID)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
