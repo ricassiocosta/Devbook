@@ -173,3 +173,14 @@ func (p Posts) GetPostsByUserID(userID uint64) ([]models.Post, error) {
 
 	return posts, nil
 }
+
+// Like add one like on post count
+func (p Posts) Like(postID uint64) error {
+	statement, err := p.db.Query("UPDATE posts SET likes = likes + 1 WHERE id = $1", postID)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
