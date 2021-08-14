@@ -123,3 +123,17 @@ func (p Posts) Update(postID uint64, post models.Post) error {
 
 	return nil
 }
+
+// Delete removes a post from the database
+func (p Posts) Delete(postID uint64) error {
+	statement, err := p.db.Query(
+		"DELETE FROM posts WHERE id = $1",
+		postID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
