@@ -107,3 +107,19 @@ func (p Posts) GetPosts(userID uint64) ([]models.Post, error) {
 
 	return posts, nil
 }
+
+// Update changes the post data in the database
+func (p Posts) Update(postID uint64, post models.Post) error {
+	statement, err := p.db.Query(
+		"UPDATE posts SET title = $1, content = $2 WHERE id = $3",
+		post.Title,
+		post.Content,
+		postID,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	return nil
+}
